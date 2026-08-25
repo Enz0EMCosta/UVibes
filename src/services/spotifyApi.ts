@@ -377,26 +377,15 @@ const generateEstimatedFeatures = (trackId: string, durationMs = 210000): AudioF
 };
 
 export const getAudioFeatures = async (trackId: string, durationMs?: number): Promise<AudioFeatures> => {
-  try {
-    const result = await fetchSpotify<AudioFeatures>(`/audio-features/${trackId}`);
-    if (result && result.tempo) {
-      return result;
-    }
-  } catch (err) {
-    console.warn(`[UVibes] Fallback audio features triggered for ${trackId}:`, err);
-  }
-
-  // Graceful fallback if Spotify Web API restricted audio-features
+  // Spotify currently restricts this endpoint for some applications.
   return generateEstimatedFeatures(trackId, durationMs);
 };
 
 export const getRecommendations = async ({
   seed_artists,
-  seed_genres,
   seed_tracks,
   target_tempo,
-  min_tempo,
-  max_tempo,
+  seed_artist_name,
   limit = 10,
 }: {
   seed_artists?: string[];
@@ -405,52 +394,32 @@ export const getRecommendations = async ({
   target_tempo?: number;
   min_tempo?: number;
   max_tempo?: number;
+  seed_artist_name?: string;
   limit?: number;
 }): Promise<RecommendationResponse> => {
-  const params = new URLSearchParams({
-    limit: String(limit),
-  });
-
-  if (seed_artists?.length) {
-    params.set('seed_artists', seed_artists.slice(0, 5).join(','));
-  }
-
-  if (seed_genres?.length) {
-    params.set('seed_genres', seed_genres.slice(0, 5).join(','));
-  }
-
-  if (seed_tracks?.length) {
-    params.set('seed_tracks', seed_tracks.slice(0, 5).join(','));
-  }
-
-  if (target_tempo !== undefined) {
-    params.set('target_tempo', String(target_tempo));
-  }
-
-  if (min_tempo !== undefined) {
-    params.set('min_tempo', String(min_tempo));
-  }
-
-  if (max_tempo !== undefined) {
-    params.set('max_tempo', String(max_tempo));
-  }
-
-  try {
-    const response = await fetchSpotify<RecommendationResponse>(`/recommendations?${params.toString()}`);
-
-    if (response && response.tracks && response.tracks.length > 0) {
-      return response;
-    }
-  } catch (err) {
-    console.warn('[UVibes] Spotify recommendations endpoint fallback:', err);
-  }
-
-  // Fallback for accounts where Spotify has restricted the recommendations endpoint.
   try {
     const artistTracks = seed_artists?.[0] ? await getArtistTopTracks(seed_artists[0]) : [];
 
     if (artistTracks.length > 0) {
-      return { seeds: [], tracks: artistTracks.slice(0, limit) };
+      return {
+        seeds: [],
+        tracks: artistTracks
+          .filter((track) => track.id !== seed_tracks?.[0])
+          .sort((first, second) => {
+            const firstBpm = generateEstimatedFeatures(first.id, first.duration_ms).tempo;
+            const secondBpm = generateEstimatedFeatures(second.id, second.duration_ms).tempo;
+            return Math.abs(firstBpm - (target_tempo ?? 120)) - Math.abs(secondBpm - (target_tempo ?? 120));
+          })
+          .slice(0, limit),
+      };
+    }
+
+    if (seed_artist_name) {
+      const fallbackSearch = await searchSpotify(`artist:"${seed_artist_name}"`, 'track', limit + 1);
+      return {
+        seeds: [],
+        tracks: fallbackSearch.tracks.items.filter((track) => track.id !== seed_tracks?.[0]).slice(0, limit),
+      };
     }
 
     return { seeds: [], tracks: [] };

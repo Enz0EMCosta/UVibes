@@ -172,6 +172,7 @@ export const useSpotifyPlayer = ({
         const { target_tempo, min_tempo, max_tempo } = getTempoWindow(features.tempo, 0.08);
         const response = await spotifyApi.getRecommendations({
           seed_artists: track.artists?.[0]?.id ? [track.artists[0].id] : undefined,
+          seed_artist_name: track.artists?.[0]?.name,
           seed_tracks: [track.id],
           target_tempo,
           min_tempo,
