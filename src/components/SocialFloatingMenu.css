@@ -1,0 +1,212 @@
+/* ═══════════════════════════════════════════════════════════════
+   Social Floating Button & Menu (From Uiverse.io by deamelo)
+═══════════════════════════════════════════════════════════════ */
+
+.social-floating-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+/* Floating "+" Trigger Button */
+.floating-plus-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-plus-btn:hover {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.floating-plus-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.floating-plus-btn.active svg {
+  transform: rotate(45deg);
+}
+
+/* Modal Popover */
+.social-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.social-popover {
+  position: absolute;
+  bottom: 66px;
+  right: 0;
+  animation: popover-fade 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
+}
+
+@keyframes popover-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Exact Uiverse CSS (by deamelo) ── */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.up {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+.down {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+.card1 {
+  width: 80px;
+  height: 80px;
+  outline: none;
+  border: none;
+  background: white;
+  border-radius: 80px 5px 5px 5px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  transition: 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.whatsapp {
+  margin-top: 0.8em;
+  margin-left: 0.8em;
+  fill: #E1306C;
+}
+
+.card2 {
+  width: 80px;
+  height: 80px;
+  outline: none;
+  border: none;
+  background: white;
+  border-radius: 5px 80px 5px 5px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  transition: 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.linkedin {
+  margin-top: 0.8em;
+  margin-left: -0.8em;
+  fill: #0077b5;
+}
+
+.card3 {
+  width: 80px;
+  height: 80px;
+  outline: none;
+  border: none;
+  background: white;
+  border-radius: 5px 5px 5px 80px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  transition: 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.github {
+  margin-top: -0.6em;
+  margin-left: 0.8em;
+}
+
+.card4 {
+  width: 80px;
+  height: 80px;
+  outline: none;
+  border: none;
+  background: white;
+  border-radius: 5px 5px 80px 5px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  transition: 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.discord {
+  margin-top: -0.6em;
+  margin-left: -0.8em;
+  fill: #ea4335;
+}
+
+.card1:hover {
+  cursor: pointer;
+  transform: scale(1.08);
+  background-color: #E1306C;
+}
+
+.card1:hover .whatsapp {
+  fill: white;
+}
+
+.card2:hover {
+  cursor: pointer;
+  transform: scale(1.08);
+  background-color: #0077b5;
+}
+
+.card2:hover .linkedin {
+  fill: white;
+}
+
+.card3:hover {
+  cursor: pointer;
+  transform: scale(1.08);
+  background-color: black;
+}
+
+.card3:hover .github {
+  fill: white;
+}
+
+.card4:hover {
+  cursor: pointer;
+  transform: scale(1.08);
+  background-color: #ea4335;
+}
+
+.card4:hover .discord {
+  fill: white;
+}

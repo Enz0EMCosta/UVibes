@@ -1,0 +1,410 @@
+/* ═══════════════════════════════════════════════════════════════
+   Spotify Connect Card Styles (From Uiverse.io by Itskrish01)
+═══════════════════════════════════════════════════════════════ */
+
+.spotify-card-container {
+  cursor: pointer;
+  transform: scale(1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 320px;
+}
+
+.spotify-card-container:hover {
+  transform: scale(1.03) rotate(-0.5deg);
+}
+
+.spotify-card {
+  color: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: linear-gradient(135deg, #0F0F0F 0%, #0B0B0B 100%);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  transition: all 0.5s ease;
+  position: relative;
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  width: 100%;
+}
+
+.spotify-card-container:hover .spotify-card {
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 20px 40px -10px rgba(34, 197, 94, 0.2), 0 0 30px rgba(34, 197, 94, 0.15);
+}
+
+/* Background animated effects */
+.card-bg-effects {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glow-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(74, 222, 128, 0.1) 100%);
+  opacity: 0.4;
+  transition: opacity 0.5s ease;
+}
+
+.spotify-card-container:hover .glow-gradient {
+  opacity: 0.7;
+}
+
+.orb-bounce {
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, transparent 100%);
+  filter: blur(40px);
+  opacity: 0.3;
+  transition: all 0.7s ease;
+  animation: card-bounce 3s infinite alternate ease-in-out;
+}
+
+.spotify-card-container:hover .orb-bounce {
+  opacity: 0.6;
+  transform: scale(1.15);
+}
+
+.orb-ping-top {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.08);
+  filter: blur(20px);
+  animation: card-ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.orb-ping-bottom {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.08);
+  filter: blur(16px);
+  animation: card-ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  animation-delay: 1.5s;
+}
+
+.light-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(34, 197, 94, 0.08) 50%, transparent 100%);
+  transform: skewX(-15deg) translateX(100%);
+  transition: transform 1s ease;
+}
+
+.spotify-card-container:hover .light-sweep {
+  transform: skewX(-15deg) translateX(-200%);
+}
+
+/* Card Content */
+.card-content {
+  padding: 24px 20px;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.icon-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.ring-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.2);
+  animation: card-ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.ring-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  animation: card-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: 0.5s;
+}
+
+.icon-circle {
+  padding: 16px;
+  border-radius: 50%;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(17, 24, 39, 0.7) 100%);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  transition: all 0.5s ease;
+}
+
+.spotify-card-container:hover .icon-circle {
+  transform: rotate(12deg) scale(1.08);
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.3);
+}
+
+.icon-rotator {
+  transition: transform 0.7s ease;
+}
+
+.spotify-card-container:hover .icon-rotator {
+  transform: rotate(180deg);
+}
+
+.spotify-svg {
+  width: 32px;
+  height: 32px;
+  fill: #22c55e;
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+  transition: all 0.3s ease;
+}
+
+.spotify-card-container:hover .spotify-svg {
+  fill: #4ade80;
+  filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.9));
+}
+
+.title-wrap {
+  margin-bottom: 8px;
+  transition: transform 0.3s ease;
+}
+
+.spotify-card-container:hover .title-wrap {
+  transform: scale(1.05);
+}
+
+.brand-title {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #4ade80 0%, #22c55e 50%, #4ade80 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-pulse 2.5s infinite;
+  letter-spacing: 0.05em;
+}
+
+.text-desc-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 260px;
+}
+
+.desc-highlight {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 2px;
+  transition: transform 0.3s ease;
+}
+
+.spotify-card-container:hover .desc-highlight {
+  transform: scale(1.03);
+}
+
+.desc-line {
+  color: #9ca3af;
+  font-size: 11px;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.spotify-card-container:hover .desc-line {
+  color: #e5e7eb;
+}
+
+.card-divider {
+  margin-top: 14px;
+  width: 35%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #22c55e, transparent);
+  border-radius: 999px;
+  transition: all 0.5s ease;
+  animation: card-pulse 2s infinite;
+}
+
+.spotify-card-container:hover .card-divider {
+  width: 55%;
+  height: 3px;
+}
+
+.pulse-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.spotify-card-container:hover .pulse-dots {
+  opacity: 1;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  animation: dot-bounce 1s infinite alternate;
+}
+
+.dot.d2 {
+  animation-delay: 0.15s;
+}
+
+.dot.d3 {
+  animation-delay: 0.3s;
+}
+
+/* Corner Glows */
+.corner-glow-tl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, transparent 100%);
+  border-bottom-right-radius: 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.corner-glow-br {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(315deg, rgba(34, 197, 94, 0.15) 0%, transparent 100%);
+  border-top-left-radius: 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.spotify-card-container:hover .corner-glow-tl,
+.spotify-card-container:hover .corner-glow-br {
+  opacity: 1;
+}
+
+/* Connected Badge */
+.spotify-connected-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 16, 26, 0.85);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+
+.spotify-connected-badge:hover {
+  border-color: #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+}
+
+.spotify-connected-badge:hover .logout-hint {
+  display: inline;
+  color: #ef4444;
+}
+
+.spotify-connected-badge:hover .connected-text {
+  display: none;
+}
+
+.dot-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: card-ping 2s infinite;
+}
+
+.connected-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.logout-hint {
+  display: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes card-ping {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  80%,
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes card-pulse {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes card-bounce {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes dot-bounce {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes text-pulse {
+
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.6));
+  }
+}
