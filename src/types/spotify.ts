@@ -94,6 +94,20 @@ export interface SpotifyCurrentlyPlayingResponse {
   currently_playing_type?: string;
 }
 
+export interface SpotifyDevice {
+  id: string;
+  is_active: boolean;
+  is_private_session: boolean;
+  is_restricted: boolean;
+  name: string;
+  type: string;
+  volume_percent: number | null;
+}
+
+export interface SpotifyDevicesResponse {
+  devices: SpotifyDevice[];
+}
+
 export interface SpotifyTokenResponse {
   access_token: string;
   token_type: string;
@@ -112,6 +126,10 @@ export interface SpotifySearchResponse {
     previous: string | null;
     total: number;
   };
+}
+
+export interface SpotifyArtistTopTracksResponse {
+  tracks: SpotifyTrack[];
 }
 
 export type PlayerMode = 'live' | 'search' | 'demo';

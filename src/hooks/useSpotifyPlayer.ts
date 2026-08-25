@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   convertDemoToSpotifyTrack,
   DEMO_TRACKS,
@@ -69,7 +69,10 @@ export const useSpotifyPlayer = ({
   pollIntervalMs = 6000,
   initialMode = 'demo',
 }: UseSpotifyPlayerOptions = {}): UseSpotifyPlayerResult => {
-  const [mode, setModeState] = useState<PlayerMode>(initialMode);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => spotifyApi.isUserLoggedIn());
+  const [mode, setModeState] = useState<PlayerMode>(() =>
+    spotifyApi.isUserLoggedIn() ? 'live' : initialMode
+  );
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
   const [audioFeatures, setAudioFeatures] = useState<AudioFeatures | null>(null);
   const [recommendations, setRecommendations] = useState<SpotifyTrack[]>([]);
@@ -77,11 +80,7 @@ export const useSpotifyPlayer = ({
   const [activeDemoId, setActiveDemoId] = useState<string | null>(DEMO_TRACKS[0]?.id ?? null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => spotifyApi.isUserLoggedIn());
   const [error, setError] = useState<string | null>(null);
-
-  const modeRef = useRef<PlayerMode>(mode);
-  modeRef.current = mode;
 
   const activeDemo = DEMO_TRACKS.find((t) => t.id === activeDemoId) ?? DEMO_TRACKS[0] ?? null;
 
@@ -172,6 +171,7 @@ export const useSpotifyPlayer = ({
       try {
         const { target_tempo, min_tempo, max_tempo } = getTempoWindow(features.tempo, 0.08);
         const response = await spotifyApi.getRecommendations({
+          seed_artists: track.artists?.[0]?.id ? [track.artists[0].id] : undefined,
           seed_tracks: [track.id],
           target_tempo,
           min_tempo,
@@ -180,13 +180,13 @@ export const useSpotifyPlayer = ({
         });
 
         if (response.tracks && response.tracks.length > 0) {
-          setRecommendations(response.tracks);
+          setRecommendations(response.tracks.filter((recommendation) => recommendation.id !== track.id));
         } else {
-          setRecommendations(getDemoRecommendationsForTempo(features.tempo));
+          setRecommendations(getDemoRecommendationsForTempo(features.tempo).filter((recommendation) => recommendation.id !== track.id));
         }
       } catch (caughtError) {
         console.warn('[UVibes] Recommendations fallback to demo pool:', caughtError);
-        setRecommendations(getDemoRecommendationsForTempo(features.tempo));
+        setRecommendations(getDemoRecommendationsForTempo(features.tempo).filter((recommendation) => recommendation.id !== track.id));
       }
     },
     []
@@ -290,11 +290,6 @@ export const useSpotifyPlayer = ({
   }, []);
 
   const refreshPlayer = useCallback(async (): Promise<void> => {
-    // Only refresh live track if user is in 'live' mode
-    if (modeRef.current !== 'live') {
-      return;
-    }
-
     try {
       const isAuth = spotifyApi.isUserLoggedIn();
       setIsAuthenticated(isAuth);
@@ -306,12 +301,9 @@ export const useSpotifyPlayer = ({
       const track = await spotifyApi.getCurrentTrack();
 
       if (!track) {
-        // Only set null if we were in live mode and no track is playing
-        if (modeRef.current === 'live') {
-          setCurrentTrack(null);
-          setAudioFeatures(null);
-          setRecommendations([]);
-        }
+        setCurrentTrack(null);
+        setAudioFeatures(null);
+        setRecommendations([]);
         return;
       }
 
@@ -323,9 +315,7 @@ export const useSpotifyPlayer = ({
         await loadRecommendationsForTrack(track, features);
       }
     } catch (caughtError) {
-      if (modeRef.current === 'live') {
-        setError(normalizeError(caughtError));
-      }
+      setError(normalizeError(caughtError));
     }
   }, [currentTrack, loadRecommendationsForTrack]);
 
@@ -392,7 +382,7 @@ export const useSpotifyPlayer = ({
 
   // Initial load
   useEffect(() => {
-    if (initialMode === 'demo') {
+    if (initialMode === 'demo' && !isAuthenticated) {
       const demo = DEMO_TRACKS[0];
       if (demo) {
         setActiveDemoId(demo.id);
@@ -401,7 +391,7 @@ export const useSpotifyPlayer = ({
         setRecommendations(getDemoRecommendationsForTempo(demo.bpm));
       }
     }
-  }, [initialMode]);
+  }, [initialMode, isAuthenticated]);
 
   // Polling interval ONLY when in live mode and authenticated
   useEffect(() => {

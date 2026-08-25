@@ -3,6 +3,8 @@ import type {
   AudioFeatures,
   RecommendationResponse,
   SpotifyCurrentlyPlayingResponse,
+  SpotifyDevicesResponse,
+  SpotifyArtistTopTracksResponse,
   SpotifyErrorResponse,
   SpotifySearchResponse,
   SpotifyTokenResponse,
@@ -237,8 +239,13 @@ export const getAccessToken = async (): Promise<string | null> => {
   }
 
   if (storedToken?.refresh_token) {
-    const refreshedToken = await refreshSpotifyToken(storedToken.refresh_token);
-    return refreshedToken.access_token;
+    try {
+      const refreshedToken = await refreshSpotifyToken(storedToken.refresh_token);
+      return refreshedToken.access_token;
+    } catch (error) {
+      clearStoredToken();
+      throw error;
+    }
   }
 
   return null;
@@ -298,21 +305,32 @@ export const searchSpotify = async (
 };
 
 export const getCurrentTrack = async (): Promise<SpotifyTrack | null> => {
-  try {
-    const response = await fetchSpotify<SpotifyCurrentlyPlayingResponse>('/me/player/currently-playing');
+  const response = await fetchSpotify<SpotifyCurrentlyPlayingResponse>('/me/player/currently-playing');
 
-    if (!response || !response.item) {
-      return null;
-    }
-
-    return response.item;
-  } catch {
+  if (!response || !response.item) {
     return null;
   }
+
+  return response.item;
+};
+
+export const getArtistTopTracks = async (artistId: string): Promise<SpotifyTrack[]> => {
+  const response = await fetchSpotify<SpotifyArtistTopTracksResponse>(
+    `/artists/${encodeURIComponent(artistId)}/top-tracks?market=BR`
+  );
+  return response?.tracks ?? [];
 };
 
 export const startPlayback = async (trackUri: string): Promise<void> => {
-  await fetchSpotify<void>('/me/player/play', {
+  const devices = await fetchSpotify<SpotifyDevicesResponse>('/me/player/devices');
+  const availableDevice = devices?.devices.find((device) => device.is_active && !device.is_restricted)
+    ?? devices?.devices.find((device) => !device.is_restricted);
+
+  if (!availableDevice) {
+    throw new Error('Abra o Spotify em um dispositivo ativo antes de trocar a música.');
+  }
+
+  await fetchSpotify<void>(`/me/player/play?device_id=${encodeURIComponent(availableDevice.id)}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -429,15 +447,13 @@ export const getRecommendations = async ({
 
   // Fallback for accounts where Spotify has restricted the recommendations endpoint.
   try {
-    const seed = seed_tracks?.[0] ?? `${target_tempo ?? 120}`;
-    const queryOptions = ['genre:pop', 'genre:indie', 'genre:dance', 'genre:alternative', 'genre:rock'];
-    const seedHash = [...seed].reduce((hash, character) => hash + character.charCodeAt(0), 0);
-    const query = queryOptions[seedHash % queryOptions.length];
-    const fallbackSearch = await searchSpotify(query, 'track', limit);
-    return {
-      seeds: [],
-      tracks: fallbackSearch.tracks.items,
-    };
+    const artistTracks = seed_artists?.[0] ? await getArtistTopTracks(seed_artists[0]) : [];
+
+    if (artistTracks.length > 0) {
+      return { seeds: [], tracks: artistTracks.slice(0, limit) };
+    }
+
+    return { seeds: [], tracks: [] };
   } catch {
     return {
       seeds: [],
