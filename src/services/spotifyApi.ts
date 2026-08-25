@@ -400,10 +400,11 @@ export const getRecommendations = async ({
 }): Promise<RecommendationResponse> => {
   try {
     if (seed_artist_name) {
-      const fallbackSearch = await searchSpotify(`artist:${seed_artist_name}`, 'track', limit + 1);
+      const fallbackSearch = await searchSpotify(seed_artist_name, 'track', limit + 8);
       return {
         seeds: [],
         tracks: fallbackSearch.tracks.items
+          .filter((track) => track.artists?.some((artist) => artist.name.toLowerCase().includes(seed_artist_name.toLowerCase())))
           .filter((track) => track.id !== seed_tracks?.[0])
           .sort((first, second) => {
             const firstBpm = generateEstimatedFeatures(first.id, first.duration_ms).tempo;
