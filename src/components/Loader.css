@@ -1,0 +1,193 @@
+/* ═══════════════════════════════════════════════
+  Loader — monochrome listening room
+═══════════════════════════════════════════════ */
+
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #07060d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  transition: opacity 0.5s ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.loader-overlay::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 50% 45%, rgba(29, 185, 84, 0.12), transparent 32%), linear-gradient(135deg, rgba(255,255,255,0.03), transparent 45%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.loader-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.loader-field canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.loader-overlay > .container,
+.loader-overlay > .loader-brand,
+.loader-overlay > .loader-bar-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Exact Uiverse CSS ── */
+
+.container {
+  width: 175px;
+  height: 175px;
+  background-color: #111217;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 24px 70px rgba(0,0,0,0.65), 0 0 34px rgba(29,185,84,0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plate {
+  width: fit-content;
+}
+
+.plate .black,
+.plate .white,
+.plate .center,
+.plate .border {
+  border-radius: 100%;
+}
+
+.container,
+.plate .black,
+.plate .white,
+.plate .border {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plate .black {
+  width: 150px;
+  height: 150px;
+  background-color: #050507;
+  animation: rotation 2s infinite linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.plate .white {
+  width: 70px;
+  height: 70px;
+  background-color: #1db954;
+}
+
+.plate .center {
+  width: 20px;
+  height: 20px;
+  background-color: #050507;
+}
+
+.plate .border {
+  width: 111px;
+  height: 111px;
+  border-top: 3px solid #1db954;
+  border-bottom: 3px solid #1db954;
+  border-left: 3px solid #050507;
+  border-right: 3px solid #050507;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: fit-content;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 8px;
+  margin-right: 8px;
+  rotate: -45deg;
+}
+
+.player .circ {
+  width: 25px;
+  height: 25px;
+  background-color: #1db954;
+  border-radius: 100%;
+  z-index: 1;
+}
+
+.player .rect {
+  width: 10px;
+  height: 55px;
+  background-color: #1db954;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 5px;
+}
+
+/* ── Brand label ── */
+
+.loader-brand {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #f4f7f5;
+}
+
+/* ── Progress bar ── */
+
+.loader-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 200px;
+}
+
+.loader-bar-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  background: #1db954;
+  border-radius: 2px;
+  transition: width 0.05s linear;
+}
+
+.loader-pct {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #7f8d84;
+  letter-spacing: 0.08em;
+}
