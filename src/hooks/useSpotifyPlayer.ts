@@ -216,6 +216,9 @@ export const useSpotifyPlayer = ({
   const selectTrack = useCallback(
     async (track: SpotifyTrack): Promise<void> => {
       setModeState('search');
+      if (spotifyApi.isUserLoggedIn() && track.uri) {
+        await spotifyApi.startPlayback(track.uri);
+      }
       await analyzeTrack(track);
     },
     [analyzeTrack]

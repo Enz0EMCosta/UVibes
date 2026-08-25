@@ -8,6 +8,22 @@ import { useSpotifyPlayer } from './hooks/useSpotifyPlayer';
 import type { SpotifyTrack } from './types/spotify';
 import './App.css';
 
+const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const CAMELOT_MAJOR = ['8B', '3B', '10B', '5B', '12B', '7B', '2B', '9B', '4B', '11B', '6B', '1B'];
+const CAMELOT_MINOR = ['5A', '12A', '7A', '2A', '9A', '4A', '11A', '6A', '1A', '8A', '3A', '10A'];
+
+const getKeyDetails = (key: number | undefined, mode: number | undefined) => {
+  if (key === undefined || key < 0 || key > 11 || mode === undefined) {
+    return { name: '--', camelot: '--' };
+  }
+
+  const isMajor = mode === 1;
+  return {
+    name: `${KEY_NAMES[key]} ${isMajor ? 'maior' : 'menor'}`,
+    camelot: (isMajor ? CAMELOT_MAJOR : CAMELOT_MINOR)[key],
+  };
+};
+
 /* ── Search Results Panel ───────────────────────────────────────────────── */
 function SearchResults({
   results,
@@ -114,6 +130,8 @@ export default function App() {
     login,
     logout,
   } = useSpotifyPlayer();
+
+  const keyDetails = getKeyDetails(audioFeatures?.key, audioFeatures?.mode);
 
   const handleSearch = useCallback(
     async (e: React.FormEvent) => {
@@ -283,6 +301,8 @@ export default function App() {
                     <div><span>BPM</span><strong>{audioFeatures?.tempo ? Math.round(audioFeatures.tempo) : '--'}</strong></div>
                     <div><span>Duração</span><strong>{Math.floor(currentTrack.duration_ms / 60000)}:{String(Math.floor(currentTrack.duration_ms / 1000) % 60).padStart(2, '0')}</strong></div>
                     <div><span>Energia</span><strong>{audioFeatures?.energy ? `${Math.round(audioFeatures.energy * 100)}%` : '--'}</strong></div>
+                    <div><span>Tonalidade</span><strong>{keyDetails.name}</strong></div>
+                    <div><span>Camelot</span><strong>{keyDetails.camelot}</strong></div>
                   </div>
                 </aside>
               </div>

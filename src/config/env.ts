@@ -24,7 +24,7 @@ const getRedirectUri = (): string => {
 };
 
 export const getSpotifyClientConfig = (): SpotifyEnv => {
-  const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '75b9f493af8247cc99726cab76ca5b83';
+  const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const redirectUri = getRedirectUri();
 
   if (!spotifyClientId) {
@@ -40,7 +40,7 @@ export const getSpotifyClientConfig = (): SpotifyEnv => {
 };
 
 export const hasSpotifyConfig = Boolean(
-  import.meta.env.VITE_SPOTIFY_CLIENT_ID || '75b9f493af8247cc99726cab76ca5b83'
+  import.meta.env.VITE_SPOTIFY_CLIENT_ID
 );
 
 export default {

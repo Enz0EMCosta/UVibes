@@ -39,8 +39,8 @@
 
 .pfp {
   position: relative;
-  height: 64px;
-  width: 64px;
+  height: 128px;
+  width: 128px;
   background-color: #282828;
   border-radius: 8px;
   display: flex;
@@ -61,12 +61,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-width: calc(100% - 76px);
+  max-width: calc(100% - 140px);
 }
 
 .title-1 {
   color: #ffffff;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -76,12 +76,22 @@
 
 .title-2 {
   color: #b3b3b3;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 3px;
+}
+
+.title-3 {
+  margin-top: 6px;
+  color: #c2d1c6;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .track-stats {
@@ -162,7 +172,16 @@
   }
 
   .title-1 {
-    font-size: 19px;
+    font-size: 23px;
+  }
+
+  .pfp {
+    height: 96px;
+    width: 96px;
+  }
+
+  .texts {
+    max-width: calc(100% - 108px);
   }
 }
 

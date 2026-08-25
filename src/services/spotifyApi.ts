@@ -184,8 +184,11 @@ export const exchangeCodeForToken = async (
   });
 
   if (!response.ok) {
-    const error = (await response.json().catch(() => ({ error: { message: 'Failed to exchange Spotify code.' } }))) as SpotifyErrorResponse;
-    throw new Error(error.error?.message ?? 'Failed to exchange Spotify code.');
+    const error = (await response.json().catch(() => null)) as
+      | (SpotifyErrorResponse & { error_description?: string; error?: string | { message?: string } })
+      | null;
+    const detail = typeof error?.error === 'string' ? error.error : error?.error?.message;
+    throw new Error(error?.error_description ?? detail ?? `Falha ao trocar o código do Spotify (${response.status}).`);
   }
 
   return (await response.json()) as SpotifyTokenResponse;
@@ -301,6 +304,16 @@ export const getCurrentTrack = async (): Promise<SpotifyTrack | null> => {
   } catch {
     return null;
   }
+};
+
+export const startPlayback = async (trackUri: string): Promise<void> => {
+  await fetchSpotify<void>('/me/player/play', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ uris: [trackUri] }),
+  });
 };
 
 const generateEstimatedFeatures = (trackId: string, durationMs = 210000): AudioFeatures => {
@@ -439,6 +452,7 @@ export const spotifyApi = {
   completeSpotifyPkceLogin,
   getAccessToken,
   getCurrentTrack,
+  startPlayback,
   getAudioFeatures,
   getRecommendations,
   searchSpotify,

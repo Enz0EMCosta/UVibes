@@ -13,7 +13,6 @@ interface SpotifyMusicCardProps {
 
 export const SpotifyMusicCard: React.FC<SpotifyMusicCardProps> = ({
   track,
-  bpm,
   onNext,
   onPrev,
   isPlaying = true,
@@ -53,8 +52,6 @@ export const SpotifyMusicCard: React.FC<SpotifyMusicCardProps> = ({
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const durationSeconds = Math.round(track.duration_ms / 1000);
-
   const albumArt =
     track.album?.images?.[1]?.url ??
     track.album?.images?.[0]?.url ??
@@ -80,20 +77,8 @@ export const SpotifyMusicCard: React.FC<SpotifyMusicCardProps> = ({
             </p>
             <p className="title-2">
               {track.artists?.[0]?.name ?? 'Artista'}
-              {bpm ? ` • ${Math.round(bpm)} BPM` : ''}
             </p>
-          </div>
-        </div>
-
-        <div className="track-stats" aria-label="Estatísticas da música">
-          <div className="track-stat">
-            <span className="track-stat-label">Duração</span>
-            <strong>{formatTime(durationSeconds)}</strong>
-          </div>
-          <div className="track-stat-divider" />
-          <div className="track-stat">
-            <span className="track-stat-label">BPM</span>
-            <strong>{bpm ? Math.round(bpm) : '--'}</strong>
+            <p className="title-3">{track.album?.name ?? 'Álbum'}</p>
           </div>
         </div>
 
