@@ -129,6 +129,11 @@ export const buildSpotifyAuthUrl = async (): Promise<string> => {
 };
 
 export const authorizeWithSpotify = async (): Promise<void> => {
+  if (typeof window !== 'undefined') {
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEYS.verifier);
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEYS.state);
+  }
+
   const authUrl = await buildSpotifyAuthUrl();
 
   window.location.assign(authUrl);
@@ -422,9 +427,12 @@ export const getRecommendations = async ({
     console.warn('[UVibes] Spotify recommendations endpoint fallback:', err);
   }
 
-  // Fallback: If recommendations endpoint failed (e.g. Spotify API 403 restriction), search related tracks by seed or popular queries
+  // Fallback for accounts where Spotify has restricted the recommendations endpoint.
   try {
-    const query = seed_tracks?.[0] ? 'vibes' : 'hits';
+    const seed = seed_tracks?.[0] ?? `${target_tempo ?? 120}`;
+    const queryOptions = ['genre:pop', 'genre:indie', 'genre:dance', 'genre:alternative', 'genre:rock'];
+    const seedHash = [...seed].reduce((hash, character) => hash + character.charCodeAt(0), 0);
+    const query = queryOptions[seedHash % queryOptions.length];
     const fallbackSearch = await searchSpotify(query, 'track', limit);
     return {
       seeds: [],

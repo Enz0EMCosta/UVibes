@@ -216,10 +216,15 @@ export const useSpotifyPlayer = ({
   const selectTrack = useCallback(
     async (track: SpotifyTrack): Promise<void> => {
       setModeState('search');
-      if (spotifyApi.isUserLoggedIn() && track.uri) {
-        await spotifyApi.startPlayback(track.uri);
-      }
       await analyzeTrack(track);
+
+      if (spotifyApi.isUserLoggedIn() && track.uri) {
+        try {
+          await spotifyApi.startPlayback(track.uri);
+        } catch (caughtError) {
+          setError(`Faixa analisada, mas não foi possível iniciar no Spotify: ${normalizeError(caughtError)}`);
+        }
+      }
     },
     [analyzeTrack]
   );
@@ -352,6 +357,15 @@ export const useSpotifyPlayer = ({
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const hasCallbackCode = params.has('code') && params.has('state');
+      const spotifyError = params.get('error');
+
+      if (spotifyError) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        window.sessionStorage.removeItem('uvibes_spotify_code_verifier');
+        window.sessionStorage.removeItem('uvibes_spotify_auth_state');
+        setError(`Autorização do Spotify cancelada: ${spotifyError}.`);
+        return;
+      }
 
       if (hasCallbackCode) {
         void (async () => {
@@ -365,6 +379,9 @@ export const useSpotifyPlayer = ({
             await refreshPlayer();
           } catch (caughtError) {
             setError(normalizeError(caughtError));
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.sessionStorage.removeItem('uvibes_spotify_code_verifier');
+            window.sessionStorage.removeItem('uvibes_spotify_auth_state');
           } finally {
             setIsLoading(false);
           }
