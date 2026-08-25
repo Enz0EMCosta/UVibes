@@ -400,7 +400,7 @@ export const getRecommendations = async ({
 }): Promise<RecommendationResponse> => {
   try {
     if (seed_artist_name) {
-      const fallbackSearch = await searchSpotify(`artist:"${seed_artist_name}"`, 'track', limit + 1);
+      const fallbackSearch = await searchSpotify(`artist:${seed_artist_name}`, 'track', limit + 1);
       return {
         seeds: [],
         tracks: fallbackSearch.tracks.items

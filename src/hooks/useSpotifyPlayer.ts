@@ -217,11 +217,24 @@ export const useSpotifyPlayer = ({
   const selectTrack = useCallback(
     async (track: SpotifyTrack): Promise<void> => {
       setModeState('search');
-      await analyzeTrack(track);
+      let selectedTrack = track;
 
-      if (spotifyApi.isUserLoggedIn() && track.uri) {
+      // Resolve demo recommendation IDs to real Spotify tracks before playback.
+      if (spotifyApi.isUserLoggedIn() && track.id.startsWith('rec-')) {
         try {
-          await spotifyApi.startPlayback(track.uri);
+          const artistName = track.artists?.[0]?.name ?? '';
+          const result = await spotifyApi.searchSpotify(`track:${track.name} artist:${artistName}`, 'track', 1);
+          selectedTrack = result.tracks.items[0] ?? track;
+        } catch {
+          selectedTrack = track;
+        }
+      }
+
+      await analyzeTrack(selectedTrack);
+
+      if (spotifyApi.isUserLoggedIn() && selectedTrack.uri && !selectedTrack.id.startsWith('rec-')) {
+        try {
+          await spotifyApi.startPlayback(selectedTrack.uri);
         } catch (caughtError) {
           setError(`Faixa analisada, mas não foi possível iniciar no Spotify: ${normalizeError(caughtError)}`);
         }
