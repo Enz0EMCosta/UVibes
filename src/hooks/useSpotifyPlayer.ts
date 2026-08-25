@@ -12,6 +12,7 @@ import type {
   PlayerMode,
   SpotifyTrack,
 } from '../types/spotify';
+import { getTempoWindow } from '../utils/bpmCalculator';
 
 interface UseSpotifyPlayerOptions {
   autoStart?: boolean;
@@ -167,11 +168,25 @@ export const useSpotifyPlayer = ({
         return;
       }
 
-      setRecommendations(
-        getDemoRecommendationsForTempo(features.tempo).filter(
-          (recommendation) => recommendation.id !== track.id
-        )
-      );
+      try {
+        const { target_tempo, min_tempo, max_tempo } = getTempoWindow(features.tempo, 0.08);
+        const response = await spotifyApi.getRecommendations({
+          seed_tracks: [track.id],
+          target_tempo,
+          min_tempo,
+          max_tempo,
+          limit: 10,
+        });
+
+        if (response.tracks && response.tracks.length > 0) {
+          setRecommendations(response.tracks.filter((recommendation) => recommendation.id !== track.id));
+        } else {
+          setRecommendations(getDemoRecommendationsForTempo(features.tempo).filter((recommendation) => recommendation.id !== track.id));
+        }
+      } catch (caughtError) {
+        console.warn('[UVibes] Recommendations fallback to demo pool:', caughtError);
+        setRecommendations(getDemoRecommendationsForTempo(features.tempo).filter((recommendation) => recommendation.id !== track.id));
+      }
     },
     []
   );
@@ -200,13 +215,11 @@ export const useSpotifyPlayer = ({
   const selectTrack = useCallback(
     async (track: SpotifyTrack): Promise<void> => {
       setModeState('search');
-      let selectedTrack = track;
+      await analyzeTrack(track);
 
-      await analyzeTrack(selectedTrack);
-
-      if (spotifyApi.isUserLoggedIn() && selectedTrack.uri && !selectedTrack.id.startsWith('rec-')) {
+      if (spotifyApi.isUserLoggedIn() && track.uri) {
         try {
-          await spotifyApi.startPlayback(selectedTrack.uri);
+          await spotifyApi.startPlayback(track.uri);
         } catch (caughtError) {
           setError(`Faixa analisada, mas não foi possível iniciar no Spotify: ${normalizeError(caughtError)}`);
         }

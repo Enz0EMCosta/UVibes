@@ -5,13 +5,19 @@ type SpotifyEnv = {
 
 const getRedirectUri = (): string => {
   if (typeof window !== 'undefined') {
-    // The URI used in authorize and token exchange must be identical.
-    return window.location.origin;
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalhost) {
+      return window.location.origin;
+    }
   }
 
   const envRedirect = import.meta.env.VITE_REDIRECT_URI;
   if (envRedirect) {
     return envRedirect.replace(/\/+$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
   }
 
   return 'http://localhost:5173';

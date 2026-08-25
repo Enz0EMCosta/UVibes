@@ -128,10 +128,6 @@ export interface SpotifySearchResponse {
   };
 }
 
-export interface SpotifyArtistTopTracksResponse {
-  tracks: SpotifyTrack[];
-}
-
 export type PlayerMode = 'live' | 'search' | 'demo';
 
 export interface BpmCategoryTrack extends SpotifyTrack {

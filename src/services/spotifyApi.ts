@@ -193,17 +193,7 @@ export const exchangeCodeForToken = async (
     const error = (await response.json().catch(() => null)) as
       | (SpotifyErrorResponse & { error_description?: string; error?: string | { message?: string } })
       | null;
-    const code = typeof error?.error === 'string' ? error.error : undefined;
-    const detail = code ?? error?.error?.message;
-
-    if (code === 'invalid_grant') {
-      throw new Error('Código OAuth inválido ou expirado. Inicie a conexão novamente sem recarregar a página.');
-    }
-
-    if (code === 'invalid_client') {
-      throw new Error('Client ID do Spotify inválido. Confira VITE_SPOTIFY_CLIENT_ID na Vercel.');
-    }
-
+    const detail = typeof error?.error === 'string' ? error.error : error?.error?.message;
     throw new Error(error?.error_description ?? detail ?? `Falha ao trocar o código do Spotify (${response.status}).`);
   }
 
@@ -248,13 +238,8 @@ export const getAccessToken = async (): Promise<string | null> => {
   }
 
   if (storedToken?.refresh_token) {
-    try {
-      const refreshedToken = await refreshSpotifyToken(storedToken.refresh_token);
-      return refreshedToken.access_token;
-    } catch (error) {
-      clearStoredToken();
-      throw error;
-    }
+    const refreshedToken = await refreshSpotifyToken(storedToken.refresh_token);
+    return refreshedToken.access_token;
   }
 
   return null;
@@ -314,13 +299,17 @@ export const searchSpotify = async (
 };
 
 export const getCurrentTrack = async (): Promise<SpotifyTrack | null> => {
-  const response = await fetchSpotify<SpotifyCurrentlyPlayingResponse>('/me/player/currently-playing');
+  try {
+    const response = await fetchSpotify<SpotifyCurrentlyPlayingResponse>('/me/player/currently-playing');
 
-  if (!response || !response.item) {
+    if (!response || !response.item) {
+      return null;
+    }
+
+    return response.item;
+  } catch {
     return null;
   }
-
-  return response.item;
 };
 
 export const startPlayback = async (trackUri: string): Promise<void> => {
@@ -379,14 +368,26 @@ const generateEstimatedFeatures = (trackId: string, durationMs = 210000): AudioF
 };
 
 export const getAudioFeatures = async (trackId: string, durationMs?: number): Promise<AudioFeatures> => {
-  // Spotify currently restricts this endpoint for some applications.
+  try {
+    const result = await fetchSpotify<AudioFeatures>(`/audio-features/${trackId}`);
+    if (result && result.tempo) {
+      return result;
+    }
+  } catch (err) {
+    console.warn(`[UVibes] Fallback audio features triggered for ${trackId}:`, err);
+  }
+
+  // Graceful fallback if Spotify Web API restricted audio-features
   return generateEstimatedFeatures(trackId, durationMs);
 };
 
 export const getRecommendations = async ({
+  seed_artists,
+  seed_genres,
   seed_tracks,
   target_tempo,
-  seed_artist_name,
+  min_tempo,
+  max_tempo,
   limit = 10,
 }: {
   seed_artists?: string[];
@@ -395,27 +396,57 @@ export const getRecommendations = async ({
   target_tempo?: number;
   min_tempo?: number;
   max_tempo?: number;
-  seed_artist_name?: string;
   limit?: number;
 }): Promise<RecommendationResponse> => {
-  try {
-    if (seed_artist_name) {
-      const fallbackSearch = await searchSpotify(seed_artist_name, 'track', limit + 8);
-      return {
-        seeds: [],
-        tracks: fallbackSearch.tracks.items
-          .filter((track) => track.artists?.some((artist) => artist.name.toLowerCase().includes(seed_artist_name.toLowerCase())))
-          .filter((track) => track.id !== seed_tracks?.[0])
-          .sort((first, second) => {
-            const firstBpm = generateEstimatedFeatures(first.id, first.duration_ms).tempo;
-            const secondBpm = generateEstimatedFeatures(second.id, second.duration_ms).tempo;
-            return Math.abs(firstBpm - (target_tempo ?? 120)) - Math.abs(secondBpm - (target_tempo ?? 120));
-          })
-          .slice(0, limit),
-      };
-    }
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
 
-    return { seeds: [], tracks: [] };
+  if (seed_artists?.length) {
+    params.set('seed_artists', seed_artists.slice(0, 5).join(','));
+  }
+
+  if (seed_genres?.length) {
+    params.set('seed_genres', seed_genres.slice(0, 5).join(','));
+  }
+
+  if (seed_tracks?.length) {
+    params.set('seed_tracks', seed_tracks.slice(0, 5).join(','));
+  }
+
+  if (target_tempo !== undefined) {
+    params.set('target_tempo', String(target_tempo));
+  }
+
+  if (min_tempo !== undefined) {
+    params.set('min_tempo', String(min_tempo));
+  }
+
+  if (max_tempo !== undefined) {
+    params.set('max_tempo', String(max_tempo));
+  }
+
+  try {
+    const response = await fetchSpotify<RecommendationResponse>(`/recommendations?${params.toString()}`);
+
+    if (response && response.tracks && response.tracks.length > 0) {
+      return response;
+    }
+  } catch (err) {
+    console.warn('[UVibes] Spotify recommendations endpoint fallback:', err);
+  }
+
+  // Fallback for accounts where Spotify has restricted the recommendations endpoint.
+  try {
+    const seed = seed_tracks?.[0] ?? `${target_tempo ?? 120}`;
+    const queryOptions = ['genre:pop', 'genre:indie', 'genre:dance', 'genre:alternative', 'genre:rock'];
+    const seedHash = [...seed].reduce((hash, character) => hash + character.charCodeAt(0), 0);
+    const query = queryOptions[seedHash % queryOptions.length];
+    const fallbackSearch = await searchSpotify(query, 'track', limit);
+    return {
+      seeds: [],
+      tracks: fallbackSearch.tracks.items,
+    };
   } catch {
     return {
       seeds: [],
