@@ -4,7 +4,6 @@ import type {
   RecommendationResponse,
   SpotifyCurrentlyPlayingResponse,
   SpotifyDevicesResponse,
-  SpotifyArtistTopTracksResponse,
   SpotifyErrorResponse,
   SpotifySearchResponse,
   SpotifyTokenResponse,
@@ -194,7 +193,17 @@ export const exchangeCodeForToken = async (
     const error = (await response.json().catch(() => null)) as
       | (SpotifyErrorResponse & { error_description?: string; error?: string | { message?: string } })
       | null;
-    const detail = typeof error?.error === 'string' ? error.error : error?.error?.message;
+    const code = typeof error?.error === 'string' ? error.error : undefined;
+    const detail = code ?? error?.error?.message;
+
+    if (code === 'invalid_grant') {
+      throw new Error('Código OAuth inválido ou expirado. Inicie a conexão novamente sem recarregar a página.');
+    }
+
+    if (code === 'invalid_client') {
+      throw new Error('Client ID do Spotify inválido. Confira VITE_SPOTIFY_CLIENT_ID na Vercel.');
+    }
+
     throw new Error(error?.error_description ?? detail ?? `Falha ao trocar o código do Spotify (${response.status}).`);
   }
 
@@ -314,13 +323,6 @@ export const getCurrentTrack = async (): Promise<SpotifyTrack | null> => {
   return response.item;
 };
 
-export const getArtistTopTracks = async (artistId: string): Promise<SpotifyTrack[]> => {
-  const response = await fetchSpotify<SpotifyArtistTopTracksResponse>(
-    `/artists/${encodeURIComponent(artistId)}/top-tracks?market=BR`
-  );
-  return response?.tracks ?? [];
-};
-
 export const startPlayback = async (trackUri: string): Promise<void> => {
   const devices = await fetchSpotify<SpotifyDevicesResponse>('/me/player/devices');
   const availableDevice = devices?.devices.find((device) => device.is_active && !device.is_restricted)
@@ -382,7 +384,6 @@ export const getAudioFeatures = async (trackId: string, durationMs?: number): Pr
 };
 
 export const getRecommendations = async ({
-  seed_artists,
   seed_tracks,
   target_tempo,
   seed_artist_name,
@@ -398,12 +399,11 @@ export const getRecommendations = async ({
   limit?: number;
 }): Promise<RecommendationResponse> => {
   try {
-    const artistTracks = seed_artists?.[0] ? await getArtistTopTracks(seed_artists[0]) : [];
-
-    if (artistTracks.length > 0) {
+    if (seed_artist_name) {
+      const fallbackSearch = await searchSpotify(`artist:"${seed_artist_name}"`, 'track', limit + 1);
       return {
         seeds: [],
-        tracks: artistTracks
+        tracks: fallbackSearch.tracks.items
           .filter((track) => track.id !== seed_tracks?.[0])
           .sort((first, second) => {
             const firstBpm = generateEstimatedFeatures(first.id, first.duration_ms).tempo;
@@ -411,14 +411,6 @@ export const getRecommendations = async ({
             return Math.abs(firstBpm - (target_tempo ?? 120)) - Math.abs(secondBpm - (target_tempo ?? 120));
           })
           .slice(0, limit),
-      };
-    }
-
-    if (seed_artist_name) {
-      const fallbackSearch = await searchSpotify(`artist:"${seed_artist_name}"`, 'track', limit + 1);
-      return {
-        seeds: [],
-        tracks: fallbackSearch.tracks.items.filter((track) => track.id !== seed_tracks?.[0]).slice(0, limit),
       };
     }
 
