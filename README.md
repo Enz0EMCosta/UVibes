@@ -44,15 +44,15 @@ As músicas encontradas podem ser organizadas de acordo com sua relação com o 
 - Doubletime — aproximadamente o dobro do BPM.
 
 **Tecnologias Utilizadas:**
-- Para o desenvolvimento da interface e na estruturação da aplicação:
+Para o desenvolvimento da interface e na estruturação da aplicação:
 * React — construção da interface e componentes;
 * TypeScript — tipagem estática e desenvolvimento da aplicação;
 * Vite — ferramenta de desenvolvimento e build;
 * CSS — estilização, responsividade e efeitos visuais.
-- Para a integração e autenticação com Spotify:
+Para a integração e autenticação com Spotify:
 * Spotify Web API — acesso aos dados musicais;
 * OAuth PKCE — autenticação da aplicação com o Spotify.
-- As ferramentas para o gerenciamento de variáveis e a qualidade do código:
+As ferramentas para o gerenciamento de variáveis e a qualidade do código:
 * dotenv — gerenciamento de variáveis de ambiente;
 * oxlint — análise estática e verificação do código.
 
