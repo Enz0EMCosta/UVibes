@@ -65,16 +65,20 @@ Passo a Passo
    cd UVibes
 
 2. **Instale as dependências:**
-npm install
+```bash
+   npm install
+   ```
 
 3. **Configure as Variáveis de Ambiente:**
 Crie um arquivo .env na raiz do projeto com base no .env.example:
-''VITE_SPOTIFY_CLIENT_ID=seu_client_id_aqui
-VITE_SPOTIFY_REDIRECT_URI=http://localhost:5173/callback''
-
+```env
+   VITE_SPOTIFY_CLIENT_ID=seu_client_id_aqui
+   VITE_SPOTIFY_REDIRECT_URI=http://localhost:5173/callback
+   ```
 4. **Inicie o servidor de desenvolvimento:**
-''npm run dev''
-
+```bash
+   npm run dev
+   ```
 O UVibes nasceu da ideia de transformar uma experiência cotidiana — ouvir música — em uma forma de descobrir novos conteúdos, onde ao invés vez de simplesmente perguntar:
 - "Qual música você gosta?"
 o UVibes busca entender:
