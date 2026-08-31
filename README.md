@@ -79,7 +79,7 @@ Crie um arquivo .env na raiz do projeto com base no .env.example:
 ```bash
    npm run dev
    ```
-O UVibes nasceu da ideia de transformar uma experiência cotidiana — ouvir música — em uma forma de descobrir novos conteúdos, onde ao invés vez de simplesmente perguntar:
+O UVibes nasceu da ideia de transformar uma experiência cotidiana — ouvir música — em uma forma de descobrir novos conteúdos, onde ao invés de simplesmente perguntar:
 - "Qual música você gosta?"
 o UVibes busca entender:
 - "Quais características fazem você gostar dessa música?"
